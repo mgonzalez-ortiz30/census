@@ -1,0 +1,72 @@
+---
+title: "Analyzing US Census Data"
+author: "Melissa Gonzalez-Ortiz"
+execute:
+  echo: false
+---
+
+```{r}
+#| message: false
+library(tidyverse)
+library(tidycensus)
+library(sf)
+```
+
+```{r}
+#| message: false
+#| cache: true
+income_tx <- get_acs(
+  geography = "county",
+  variables = "B19013_001",
+  state = "TX",
+  year = 2020,
+  geometry = TRUE
+)
+```
+
+```{r}
+#| message: false
+age_ca <- get_acs(
+  geography = "county",
+  variables = c(median_age = "B01002_001", population = "B01003_001"),
+  state = "CA",
+  year = 2020,
+  geometry = FALSE
+)
+```
+
+```{r}
+#| message: false
+edu_state <- get_acs(
+  geography = "state",
+  variables = c("B15003_001", "B15003_022", "B15003_023", "B15003_024", "B15003_025"),
+  summary_var = "B15003_001",
+  year = 2020
+)
+```
+
+```{r}
+edu_state |>
+  filter(variable %in% c("B15003_022", "B15003_023", "B15003_024", "B15003_025")) |>
+  group_by(GEOID, NAME) |>
+  summarise(
+    percent_bachelor_plus = 100 * sum(estimate, na.rm = TRUE) / first(summary_est),
+    .groups = "drop"
+  ) |>
+  arrange(desc(percent_bachelor_plus)) |>
+  print()
+```
+
+```{r}
+ggplot(income_tx) +
+  geom_sf(aes(fill = estimate), color = "white", linewidth = 0.1) +
+  scale_fill_viridis_c(labels = scales::label_dollar()) +
+  labs(
+    title = "Median Household Income by Texas County",
+    fill = "Median household income",
+    caption = "Source: U.S. Census Bureau, 2020 American Community Survey 5-year estimates."
+  ) +
+  theme_void() +
+  theme(legend.position = "bottom")
+```
+

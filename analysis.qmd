@@ -26,6 +26,17 @@ income_tx <- get_acs(
 
 ```{r}
 #| message: false
+age_ca <- get_acs(
+  geography = "county",
+  variables = c(median_age = "B01002_001", population = "B01003_001"),
+  state = "CA",
+  year = 2020,
+  geometry = FALSE
+)
+```
+
+```{r}
+#| message: false
 edu_state <- get_acs(
   geography = "state",
   variables = c("B15003_001", "B15003_022", "B15003_023", "B15003_024", "B15003_025"),
