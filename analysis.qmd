@@ -25,6 +25,28 @@ income_tx <- get_acs(
 ```
 
 ```{r}
+#| message: false
+edu_state <- get_acs(
+  geography = "state",
+  variables = c("B15003_001", "B15003_022", "B15003_023", "B15003_024", "B15003_025"),
+  summary_var = "B15003_001",
+  year = 2020
+)
+```
+
+```{r}
+edu_state |>
+  filter(variable %in% c("B15003_022", "B15003_023", "B15003_024", "B15003_025")) |>
+  group_by(GEOID, NAME) |>
+  summarise(
+    percent_bachelor_plus = 100 * sum(estimate, na.rm = TRUE) / first(summary_est),
+    .groups = "drop"
+  ) |>
+  arrange(desc(percent_bachelor_plus)) |>
+  print()
+```
+
+```{r}
 ggplot(income_tx) +
   geom_sf(aes(fill = estimate), color = "white", linewidth = 0.1) +
   scale_fill_viridis_c(labels = scales::label_dollar()) +
